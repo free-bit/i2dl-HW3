@@ -10,11 +10,12 @@ class Normalize(object):
         image, key_pts = sample['image'], sample['keypoints']
 
         ##############################################################
-        # TODO: Implemnet the Normalize function, where we normalize #
+        # DONE: Implement the Normalize function, where we normalize #
         # the image from [0, 255] to [0,1] and keypoints from [0, 96]#
         # to [-1, 1]                                                 #
         ##############################################################
-
+        image = image / 255
+        key_pts = (key_pts - 48) / 48
         ##############################################################
         # End of your code                                           #
         ##############################################################
