@@ -25,6 +25,8 @@ class Solver(object):
         self.train_acc_history = []
         self.val_acc_history = []
         self.val_loss_history = []
+        self.train_epoch_acc_history = []
+        self.val_epoch_acc_history = []
 
     def train(self, model, train_loader, val_loader, num_epochs=10, log_nth=0):
         """
@@ -72,11 +74,10 @@ class Solver(object):
                 train_inputs, train_targets = train_inputs.to(device), train_targets.to(device)
                 optim.zero_grad()                                 # Clear gradients
                 train_out = model(train_inputs)                   # Get predictions
-                # TODO: Crop will be needed here
                 loss = self.loss_func(train_out, train_targets)   # Calculate loss
                 loss.backward()                                   # Backpropagation
                 optim.step()                                      # Optimize parameters based on backpropagation
-                self.train_loss_history.append(loss)              # Store loss for each batch
+                self.train_loss_history.append(loss.item())       # Store loss for each batch
 
                 # Log nth iteration
                 if iter % log_nth == 0:
@@ -86,7 +87,7 @@ class Solver(object):
             _, train_preds = torch.max(train_out, 1) # torch.max returns (max, max_indices)
             targets_mask = train_targets >= 0
             acc = np.mean((train_preds == train_targets)[targets_mask].data.cpu().numpy())
-            self.val_acc_history.append(acc)
+            self.train_acc_history.append(acc)
 
             # Validate after training for one epoch
             model.eval()
@@ -108,8 +109,10 @@ class Solver(object):
             train_acc = self.train_acc_history[-1]
             val_loss = np.mean(self.val_loss_history)
             val_acc = np.mean(self.val_acc_history)
-            print("[Epoch {}/{}] TRAIN acc/loss: {}".format(epoch, num_epochs, train_acc, train_loss))
-            print("[Epoch {}/{}] VAL   acc/loss: {}".format(epoch, num_epochs, val_acc, val_loss))
+            print("[Epoch {}/{}] TRAIN acc/loss: {}/{}".format(epoch, num_epochs, train_acc, train_loss))
+            print("[Epoch {}/{}] VAL   acc/loss: {}/{}".format(epoch, num_epochs, val_acc, val_loss))
+            self.train_epoch_acc_history.append(train_acc)
+            self.val_epoch_acc_history.append(val_acc)
 
 
         #######################################################################
